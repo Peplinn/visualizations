@@ -1,0 +1,36 @@
+---
+title: "playground"
+format: pdf
+---
+
+```{r}
+library("tidytuesdayR")
+library("tidyverse")
+library("dplyr")
+library("ggplot2")
+
+tuesdata <- tidytuesdayR::tt_load('2025-09-02')
+```
+
+
+```{r}
+id_data <- tuesdata$frogID_data
+frog_names <- tuesdata$frog_names
+class(frog_names)
+# class(id_data)
+frog_names$scientificName[frog_names$scientificName == "Heleioporus australiacus australiacus"] <- "Heleioporus australiacus"
+
+frog_data <- left_join(
+  id_data,
+  frog_names,
+  by = "scientificName",
+  relationship = "many-to-many"
+)
+```
+
+
+```{r}
+sum(is.na(frog_data$commonName))
+# sapply(frog_data, function(x) sum(is.na(x)))
+```
+
