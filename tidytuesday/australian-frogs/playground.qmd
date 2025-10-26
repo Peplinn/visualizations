@@ -3,34 +3,430 @@ title: "playground"
 format: pdf
 ---
 
+# Picking a Visualization Angle
+
+There are a number of things we can choose to communicate:
+
+1. Monthly/seasonal patterns of frog observations
+2. Amount of frogs in each species observed
+3. The range (distance) of frog observations
+4. Regions where frogs were observed
+5. When observations were made
+6. How rare/abundant each frog is
+
+
+And given that the data spans only 2023, we can use:
+
+1. Monthly or seasonal patterns
+2. Range of observations
+3. Amount of observations
+4. Regions of observations
+5. When are the most observations made
+6. Rarity
+
+I would like to show rarities, and monthly or seasonal patterns on a map (range) for frog species
+
+
+# Exploration & Wrangling
+
 ```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
 library("tidytuesdayR")
 library("tidyverse")
 library("dplyr")
 library("ggplot2")
+library("lubridate")
+library("patchwork") # for composing plots
+library("showtext") # for fonts
 
 tuesdata <- tidytuesdayR::tt_load('2025-09-02')
 ```
 
+## Supplying Common Name for all Observations
+
 
 ```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
 id_data <- tuesdata$frogID_data
 frog_names <- tuesdata$frog_names
 class(frog_names)
 # class(id_data)
-frog_names$scientificName[frog_names$scientificName == "Heleioporus australiacus australiacus"] <- "Heleioporus australiacus"
+# frog_names$scientificName[frog_names$scientificName == "Heleioporus australiacus australiacus"] <- "Heleioporus australiacus"
 
-frog_data <- left_join(
+# frog_data <- left_join(
+#   id_data,
+#   frog_names,
+#   by = "scientificName",
+#   relationship = "many-to-many"
+# )
+
+frog_data <- inner_join(
   id_data,
   frog_names,
   by = "scientificName",
   relationship = "many-to-many"
 )
+
+# id_data <- id_data %>%
+#   mutate(genus_species = str_extract(scientificName, "^\\S+\\s+\\S+"))
+# 
+# frog_names <- frog_names %>%
+#   mutate(genus_species = str_extract(scientificName, "^\\S+\\s+\\S+"))
+# 
+# # Collapse common names across subspecies
+# frog_names_collapsed <- frog_names %>%
+#   group_by(genus_species) %>%
+#   summarise(
+#     commonName = paste(unique(commonName), collapse = " / "),
+#     .groups = "drop"
+#   )
+# 
+# # Join back
+# frog_data <- left_join(id_data, frog_names_collapsed, by = "genus_species")
+
+clean_frog <- frog_data %>% drop_na()
 ```
+
+I have found a solution in the chunk above, where for frogs which have been recorded only at the species level, I combine their names in the common name column. So we have things like "Alpine Tree Frog / Whistling Tree Frog".
+
+## Splitting Event Date into Month and Year
+
+```{r}
+clean_frog$month <- month(clean_frog$eventDate, label = TRUE, abbr = TRUE)
+clean_frog$year <- year(clean_frog$eventDate)
+
+str(clean_frog)
+```
+
+
+
+
+## Correcting Column Data Types
+
+I want to create a new column called "Species", taken from the last word in each observation's Scientific Name.
+OR
+Factor the commonNames column
+
+In addition to correcting the dtypes of other columns
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+str(clean_frog)
+
+clean_frog <- clean_frog %>%
+  mutate(
+    scientificName = as.factor(scientificName),
+    stateProvince = as.factor(stateProvince),
+    commonName = as.factor(commonName)
+    )
+
+str(clean_frog)
+```
+
+## Exploratory Visualizations
+
+Since we are visualizing monthly/seasonal variations, rarity, and range, I will visualize:
+
+1. The monthly variations using the commonNames and a faceted bar chart. I would need to group by month (extracted from `eventDate`)
+2. The rarity using all the the first and last 5 commonNames, and a bar chart
+3. The range using by calculating the minimum and maximum longitudes and latitudes to construct a square whose area I can calculate.
+
+### Visualizing Top and Bottom 5 across months
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Exploratory Viz 2, for January
+# First, I need to isolate top and bottom 5
+
+top_bottom_frogs <- clean_frog %>%
+  group_by(month, commonName) %>%
+  summarise(observations = n(), .groups = "drop_last") %>%
+  mutate(rank = dense_rank(desc(observations))) %>%
+  group_by(month) %>%
+  filter(rank <= 5 | rank > max(rank) - 5) %>%
+  ungroup()
+
+str(top_bottom_frogs)
+
+
+# Next, visualize
+top_bottom_frogs %>%
+  filter(month == "Jan") %>%
+  mutate(commonName = factor(commonName)) %>%
+ggplot( aes(x = fct_drop(reorder(commonName, observations)),
+                         y = observations,
+                         fill = rank <= 5)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c("TRUE" = "steelblue", "FALSE" = "grey70"),
+                    labels = c("Bottom 5", "Top 5"),
+                    name = "Group") +
+  labs(
+    title = "Top and Bottom 5 Observed Frog Species in January obs",
+    x = "Frog Species",
+    y = "Number of Observations"
+  ) +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 7))
+
+```
+
+
+# NEW PLAN
+
+To ensure that I don't get stuck on irrelevant things, I am going to pick one of the questions on the readme page, and try to visualize it well.
+I am going with: Do different frog species have distinct calling seasons?
+
+For this, I will visualize all the frog observations in 12 australian maps (representing the months of the recording year), and point out the most prominent frog in each month. 
+
+Additionally, I will highlight the overall most abundant and rare frog in the entire frog list.
+
+## How do we plot maps in R?
+
+Good question.
+
+I have found that ggplot is able to do so!
+
+From the tutorial I saw:
+
+```{r}
+library(giscoR) # This contains map polygons
+
+aussie <- gisco_get_countries(country = "Australia", resolution = 1) ## This extracts Australia
+```
+
+Now, our dataset already contains lat and longs so we can plot right away:
+
+```{r}
+ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude)) +
+  theme_void()
+```
+
+I've definitely seen worse plots.
+
+Now, let's attempt to facet it by month:
+
+```{r}
+ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude)) +
+  facet_wrap(~month, ncol = 4, nrow = 3) +
+  theme_void()
+```
+That seems to have worked, but it doesn't look great.
+
+Going back to our visualization questions,
+
+
+# NEW NEW PLAN
+
+I am going to convert the Genuses of all the frogs into its own factor column. Then, using the one map, I will show the distributions of the Genuses across Australia. I will also add pictures of the most prominent frogs in each region.
 
 
 ```{r}
-sum(is.na(frog_data$commonName))
-# sapply(frog_data, function(x) sum(is.na(x)))
+# The same way we isolated the genus and species
+
+clean_frog <- clean_frog %>%
+  mutate(genus = str_extract(scientificName, "^\\S+"))
+
+clean_frog$genus <- as.factor(clean_frog$genus)
+clean_frog$tribe <- as.factor(clean_frog$tribe)
+clean_frog$subfamily <- as.factor(clean_frog$subfamily)
+
+str(clean_frog)
 ```
+
+Now, I am going to visualize (using bar plots and the map), the subfamilies, tribes, and genuses of all the frogs in the dataset:
+
+```{r}
+library(paletteer)
+
+# counting each subfamily
+clean_frog %>%
+  group_by(subfamily) %>%
+  summarise(count = n())
+
+
+# subfamily bar plot
+clean_frog %>%
+  ggplot(aes(x = subfamily)) +
+  geom_bar() +
+  theme_bw()
+
+# subfamily map plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void()
+
+
+# counting each tribe
+clean_frog %>%
+  group_by(tribe) %>%
+  summarise(count = n())
+
+
+# tribe bar plot
+clean_frog %>%
+  ggplot(aes(x = tribe)) +
+  geom_bar() +
+  theme_bw()
+
+# tribe map plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+  scale_color_brewer(palette = "Dark2") +
+  theme_void()
+
+# # counting each genus
+# clean_frog %>%
+#   group_by(genus) %>%
+#   summarise(count = n())
+# 
+# 
+# # genus bar plot
+# clean_frog %>%
+#   ggplot(aes(x = genus)) +
+#   geom_bar() +
+#   theme_bw()
+# 
+# # genus map plot
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = genus)) +
+#   theme_void()
+
+
+
+```
+
+
+Seeing the plots, I think the Genus level plots are too busy. I will focus on tribe and subfamilies.
+I just need to find color palettes that don't look awful on the plot.
+
+I am going to try to create separate map heatmap (or choropleth) plots of each tribe or subfamily.
+
+```{r}
+
+# subfamily map facet plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
+  facet_wrap(~subfamily) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void()
+
+# tribe map facet plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+  facet_wrap(~tribe) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void()
+
+```
+
+I think I like the tribe plot.
+
+Since we also asked "Do different frog species have distinct calling seasons?", I would like to show the temporal distribution of observations within each tribe across the year, while making sure that the plot is not cluttered.
+
+I can have 6 columns, and within each one, show the scattering of frogs at the four season of the year.
+
+There will be 24 maps total. Do I want that?
+
+If it is cluttered, I can instead add a single histogram to each map plot to show the frequency of observations throughout the year.
+
+```{r}
+
+# Creating a new season column
+clean_frog$month_num <- match(clean_frog$month, month.abb)
+
+# clean_frog <- clean_frog %>% 
+#   mutate(season = case_when(
+#   month_num %in% c(12, 1, 2) ~ "Winter",
+#   month_num %in% c(3, 4, 5) ~ "Spring",
+#   month_num %in% c(6, 7, 8) ~ "Summer",
+#   month_num %in% c(9, 10, 11) ~ "Fall"
+# ))
+
+clean_frog <- clean_frog %>%
+  mutate(season = cut(month_num,
+                    breaks = c(0, 2, 5, 8, 11, 12),
+                    labels = c("Winter", "Spring", "Summer", "Fall", "Winter"),
+                    include.lowest = TRUE))
+
+clean_frog <- clean_frog %>%
+  mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
+
+# tribe map facet plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+  facet_grid(season ~ tribe) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void()
+```
+
+
+So the multiple maps is too busy. Let's see the histograms alongside the map plots:
+
+```{r}
+
+# tribe map facet plot
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+  facet_wrap(~tribe, nrow = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Distribution of Observations by Tribe (Map)") +
+  theme_void()
+
+# Each tribe's temporal distribution
+clean_frog %>%
+  group_by(tribe) %>%
+  mutate(total_tribe_obs = n()) %>%
+  group_by(tribe, month) %>%
+  summarise(
+    monthly_count = n(),
+    total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+    .groups = 'drop_last' # Keep the grouping structure for the next step
+  ) %>%
+  mutate(proportion = monthly_count / total_tribe_obs) %>%
+  ggplot(aes(x = month, y = proportion, fill = tribe)) +  # Replace 'body_length' with your chosen numeric column
+  geom_col(color = "black") + # Bins control the smoothness
+  facet_wrap(~tribe, nrow = 1)
+  labs(title = "Distribution of Frog Body Length Observations",
+       x = "Month",
+       y = "Frequency (Number of Observations)") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void()
+```
+
+
+
+
 
