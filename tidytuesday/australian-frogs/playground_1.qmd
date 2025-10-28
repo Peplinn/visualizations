@@ -718,13 +718,13 @@ theme_set(theme_void(base_family = "title_font", base_size = 12))
 
 showtext_auto()
 
-title_text <- "Diversity of Australia's Frogs"
-subtitle_text <- "Australia's frogs belong to 6 tribes, from the widespread Myobatrachidae \nto the north-eastern Ranidae."
+title_text <- "Where are Australia's Frogs?"
+subtitle_text <- "Australia is home to 6 frog tribes, from the ubiquitous Myobatrachidae \nto the north-eastern Ranidae."
 subtitle_text_colored <- paste0(
-  "Australia's frogs belong to 6 tribes, from the widespread <span style='color:",
-  frog_palette_named["Myobatrachidae"], "'>**Myobatrachidae**</span> <br>",
-  "to the north-eastern <span style='color:",
-  frog_palette_named["Ranidae"], "'>**Ranidae**</span>." # Adjust tribe names/colors
+  "Six frog tribes inhabit Australia, from the widespread <span style='color:",
+  frog_palette_named["Myobatrachidae"], "'>**Myobatrachidae**</span> with **64** subspecies<br>",
+  "to the <span style='color:",
+  frog_palette_named["Ranidae"], "'>**Ranidae**</span> of the northeast, one of the few **true** frog tribes." # Adjust tribe names/colors
 )
 caption_text <- "Visualization: Chidiebube Oluoma"
 
@@ -751,12 +751,13 @@ map_plots_wide <- clean_frog %>%
     ),
     plot.subtitle = ggtext::element_markdown(
       size = 34,
+      margin = margin(0, 0, 10, 0),
       lineheight = 0.3
     ),
     plot.caption = element_text(
       size = 30,
       lineheight = 0.05,
-      margin = margin(0, 0, 5, 0)
+      margin = margin(10, 0, 5, 0)
     ),
     strip.text = element_text(
       size = 30,
@@ -775,14 +776,15 @@ map_plots_wide
 
 # ggsave("map_graph_long.png", map_plots_long)
 ggsave("map_graph_wide.png", map_plots_wide)
-ggsave("map_graph_wide_2.png", map_plots_wide, width = 13, height = 8, units = "in")
+ggsave("map_graph_wide_2.png", map_plots_wide, width = 13, height = 15, units = "in")
 ```
 
 
 ```{r}
 
-
-frog_palette_named
+clean_frog %>%
+  group_by(tribe)
+  summarize()
 ```
 
 
