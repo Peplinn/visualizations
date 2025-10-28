@@ -27,6 +27,7 @@ library("paletteer")
 library("devtools")
 library("streamgraph")
 library("RColorBrewer")
+library("ggtext")
 
 tuesdata <- tidytuesdayR::tt_load('2025-09-02')
 ```
@@ -706,26 +707,25 @@ font_add_google(
 
 showtext_auto()
 
-frog_palette <- c("#f0b41a", "#057cc5", "#d7bb71", "#0a2463", "#d8315b", "#1e2f23")
+# frog_palette <- c("#f0b41a", "#057cc5", "#d7bb71", "#0a2463", "#d8315b", "#1e2f23")
+frog_palette <- c("#d7bb71", "#0a2463", "#d8315b", "#057cc5", "#f0b41a", "#1e2f23")
+frog_tribes <- c("Asterophryninae", "Bufonidae", "Limnodynastidae", "Myobatrachidae", "Pelodryadidae", "Ranidae")
+# frog_palette_named <- setNames(frog_palette, unique(clean_frog$tribe))
+frog_palette_named <- setNames(frog_palette, frog_tribes)
 
 theme_set(theme_void(base_family = "title_font", base_size = 12))
 
 
 showtext_auto()
 
-# map_plots_long <- clean_frog %>%
-#   ggplot() +
-#   geom_sf(data = aussie, fill = "grey", color = "dimgray", alpha = 0.5, linewidth = 0.2) +
-#   geom_point(
-#     aes(x = decimalLongitude, y = decimalLatitude, color = tribe),
-#     size = 0.5) +
-#   facet_wrap(~tribe, nrow = 3, ncol = 2) +
-#   scale_color_manual(values = frog_palette) +
-#   labs(title = title_text, caption = caption_text) +
-#   theme_void(base_family = "title_font")
-
 title_text <- "Diversity of Australia's Frogs"
 subtitle_text <- "Australia's frogs belong to 6 tribes, from the widespread Myobatrachidae \nto the north-eastern Ranidae."
+subtitle_text_colored <- paste0(
+  "Australia's frogs belong to 6 tribes, from the widespread <span style='color:",
+  frog_palette_named["Myobatrachidae"], "'>**Myobatrachidae**</span> <br>",
+  "to the north-eastern <span style='color:",
+  frog_palette_named["Ranidae"], "'>**Ranidae**</span>." # Adjust tribe names/colors
+)
 caption_text <- "Visualization: Chidiebube Oluoma"
 
 map_plots_wide <- clean_frog %>%
@@ -738,7 +738,7 @@ map_plots_wide <- clean_frog %>%
   scale_color_manual(values = frog_palette) +
   labs(
     title = title_text,
-    subtitle = subtitle_text,
+    subtitle = subtitle_text_colored,
     caption = caption_text
   ) +
   theme_void(base_family = "title_font") +
@@ -749,7 +749,7 @@ map_plots_wide <- clean_frog %>%
       margin = margin(10, 0, 0.5, 0),
       size = 50
     ),
-    plot.subtitle = element_text(
+    plot.subtitle = ggtext::element_markdown(
       size = 34,
       lineheight = 0.3
     ),
@@ -775,6 +775,14 @@ map_plots_wide
 
 # ggsave("map_graph_long.png", map_plots_long)
 ggsave("map_graph_wide.png", map_plots_wide)
+ggsave("map_graph_wide_2.png", map_plots_wide, width = 13, height = 8, units = "in")
+```
+
+
+```{r}
+
+
+frog_palette_named
 ```
 
 
