@@ -415,21 +415,25 @@ stream_graph <- gst_data_smooth %>%
   ) +
   coord_cartesian(xlim = real_range) +
   scale_fill_manual(values = frog_palette, name = "Tribe") +     # ← legend title for fill
-  scale_color_manual(values = frog_palette, name = "Tribe")
+  scale_color_manual(values = frog_palette, name = "Tribe") +
+  theme(legend.position = "none")
 
 map_plots <- clean_frog %>%
   ggplot() +
   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
-  facet_wrap(~tribe, nrow = 2, ncol = 3) +
+  # facet_wrap(~tribe, nrow = 2, ncol = 3) +
+  facet_wrap(~tribe, nrow = 1) +
   scale_color_manual(values = frog_palette) +
-  labs(title = "Distribution of Observations by Tribe (Map)") +
+  # labs(title = "Distribution of Observations by Tribe (Map)") +
   theme_void() +
   theme(legend.position = "none")
 
 patch <- map_plots / stream_graph
+patch_2 <- stream_graph / map_plots
 
 ggsave("stream_map_graph.png", patch)
+ggsave("stream_map_graph_2.png", patch_2)
 ```
 # Now, only the stream
 
@@ -671,6 +675,106 @@ summary(clean_frog$decimalLongitude); summary(clean_frog$decimalLatitude)
 unique(clean_frog$tribe)
 
 ```
+# I think we were on to something here
 
+```{r}
+# Counting the species within each tribe
+
+annotation_data <- clean_frog %>%
+  group_by(tribe) %>%
+  summarise(
+    subspecies = n_distinct(commonName),
+    label = paste0(tribe, "\nSubspecies: ", subspecies),
+    x = median(decimalLongitude, na.rm = TRUE),
+    y = max(decimalLatitude, na.rm = TRUE) + 0.5   # shift upward slightly
+  )
+```
+
+
+
+```{r}
+#| output: true
+
+# Using ggstream
+
+
+
+font_add_google(
+  "Jost",
+  family = "title_font"
+)
+
+showtext_auto()
+
+frog_palette <- c("#f0b41a", "#057cc5", "#d7bb71", "#0a2463", "#d8315b", "#1e2f23")
+
+theme_set(theme_void(base_family = "title_font", base_size = 12))
+
+
+showtext_auto()
+
+# map_plots_long <- clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", color = "dimgray", alpha = 0.5, linewidth = 0.2) +
+#   geom_point(
+#     aes(x = decimalLongitude, y = decimalLatitude, color = tribe),
+#     size = 0.5) +
+#   facet_wrap(~tribe, nrow = 3, ncol = 2) +
+#   scale_color_manual(values = frog_palette) +
+#   labs(title = title_text, caption = caption_text) +
+#   theme_void(base_family = "title_font")
+
+title_text <- "Diversity of Australia's Frogs"
+subtitle_text <- "Australia's frogs belong to 6 tribes, from the widespread Myobatrachidae \nto the north-eastern Ranidae."
+caption_text <- "Visualization: Chidiebube Oluoma"
+
+map_plots_wide <- clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", color = "dimgray", alpha = 0.5, linewidth = 0.2) +
+  geom_point(
+    aes(x = decimalLongitude, y = decimalLatitude, color = tribe),
+    size = 0.5) +
+  facet_wrap(~tribe, nrow = 2, ncol = 3) +
+  scale_color_manual(values = frog_palette) +
+  labs(
+    title = title_text,
+    subtitle = subtitle_text,
+    caption = caption_text
+  ) +
+  theme_void(base_family = "title_font") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(
+      face = "bold",
+      margin = margin(10, 0, 0.5, 0),
+      size = 50
+    ),
+    plot.subtitle = element_text(
+      size = 34,
+      lineheight = 0.3
+    ),
+    plot.caption = element_text(
+      size = 30,
+      lineheight = 0.05,
+      margin = margin(0, 0, 5, 0)
+    ),
+    strip.text = element_text(
+      size = 30,
+      color = "dimgray"
+    ),
+    panel.background = element_rect(
+      fill = "#f2f2f2"
+    ),
+    plot.background = element_rect(
+      fill = "#f2f2f2"
+    )
+  )
+
+# map_plots_long
+map_plots_wide
+
+# ggsave("map_graph_long.png", map_plots_long)
+ggsave("map_graph_wide.png", map_plots_wide)
+```
 
 
