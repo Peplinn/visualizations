@@ -1,6 +1,11 @@
 ---
 title: "playground"
 format: pdf
+execute:
+  echo: false       
+  warning: false
+  message: false
+  output: false
 ---
 
 # Picking a Visualization Angle
@@ -143,7 +148,8 @@ Since we are visualizing monthly/seasonal variations, rarity, and range, I will 
 ### Visualizing Top and Bottom 5 across months
 
 ```{r}
-#| echo: false
+#| execute: false
+#| cache: true
 #| message: false
 #| warning: false
 
@@ -256,45 +262,45 @@ Now, I am going to visualize (using bar plots and the map), the subfamilies, tri
 library(paletteer)
 
 # counting each subfamily
-clean_frog %>%
-  group_by(subfamily) %>%
-  summarise(count = n())
-
-
-# subfamily bar plot
-clean_frog %>%
-  ggplot(aes(x = subfamily)) +
-  geom_bar() +
-  theme_bw()
-
-# subfamily map plot
-clean_frog %>%
-  ggplot() +
-  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
-  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
-  scale_color_brewer(palette = "Set1") +
-  theme_void()
-
-
-# counting each tribe
-clean_frog %>%
-  group_by(tribe) %>%
-  summarise(count = n())
-
-
-# tribe bar plot
-clean_frog %>%
-  ggplot(aes(x = tribe)) +
-  geom_bar() +
-  theme_bw()
-
-# tribe map plot
-clean_frog %>%
-  ggplot() +
-  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
-  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
-  scale_color_brewer(palette = "Dark2") +
-  theme_void()
+# clean_frog %>%
+#   group_by(subfamily) %>%
+#   summarise(count = n())
+# 
+# 
+# # subfamily bar plot
+# clean_frog %>%
+#   ggplot(aes(x = subfamily)) +
+#   geom_bar() +
+#   theme_bw()
+# 
+# # subfamily map plot
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_void()
+# 
+# 
+# # counting each tribe
+# clean_frog %>%
+#   group_by(tribe) %>%
+#   summarise(count = n())
+# 
+# 
+# # tribe bar plot
+# clean_frog %>%
+#   ggplot(aes(x = tribe)) +
+#   geom_bar() +
+#   theme_bw()
+# 
+# # tribe map plot
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+#   scale_color_brewer(palette = "Dark2") +
+#   theme_void()
 
 # # counting each genus
 # clean_frog %>%
@@ -328,22 +334,22 @@ I am going to try to create separate map heatmap (or choropleth) plots of each t
 ```{r}
 
 # subfamily map facet plot
-clean_frog %>%
-  ggplot() +
-  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
-  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
-  facet_wrap(~subfamily) +
-  scale_color_brewer(palette = "Set1") +
-  theme_void()
-
-# tribe map facet plot
-clean_frog %>%
-  ggplot() +
-  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
-  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
-  facet_wrap(~tribe) +
-  scale_color_brewer(palette = "Set1") +
-  theme_void()
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = subfamily)) +
+#   facet_wrap(~subfamily) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_void()
+# 
+# # tribe map facet plot
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+#   facet_wrap(~tribe) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_void()
 
 ```
 
@@ -380,13 +386,13 @@ clean_frog <- clean_frog %>%
   mutate(season = factor(season, levels = c("Winter", "Spring", "Summer", "Fall")))
 
 # tribe map facet plot
-clean_frog %>%
-  ggplot() +
-  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
-  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
-  facet_grid(season ~ tribe) +
-  scale_color_brewer(palette = "Set1") +
-  theme_void()
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+#   facet_grid(season ~ tribe) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_void()
 ```
 
 
@@ -395,17 +401,53 @@ So the multiple maps is too busy. Let's see the histograms alongside the map plo
 ```{r}
 
 # tribe map facet plot
-clean_frog %>%
+# clean_frog %>%
+#   ggplot() +
+#   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+#   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+#   facet_wrap(~tribe, nrow = 1) +
+#   scale_color_brewer(palette = "Set1") +
+#   labs(title = "Distribution of Observations by Tribe (Map)") +
+#   theme_void()
+# 
+# # Each tribe's temporal distribution
+# clean_frog %>%
+#   group_by(tribe) %>%
+#   mutate(total_tribe_obs = n()) %>%
+#   group_by(tribe, month) %>%
+#   summarise(
+#     monthly_count = n(),
+#     total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+#     .groups = 'drop_last' # Keep the grouping structure for the next step
+#   ) %>%
+#   mutate(proportion = monthly_count / total_tribe_obs) %>%
+#   ggplot(aes(x = month, y = proportion, fill = tribe)) +  # Replace 'body_length' with your chosen numeric column
+#   geom_col(color = "black", show.legend = FALSE) + # Bins control the smoothness
+#   facet_wrap(~tribe, nrow = 1)
+#   labs(title = "Distribution of Frog Body Length Observations",
+#        x = "Month",
+#        y = "Frequency (Number of Observations)") +
+#   scale_y_continuous(labels = scales::percent) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_void()
+```
+
+```{r}
+#| cache: false
+
+# tribe map facet plot
+map_plot <- clean_frog %>%
   ggplot() +
   geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
   geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
-  facet_wrap(~tribe, nrow = 1) +
+  facet_wrap(~tribe, nrow = 2, ncol = 3) +
   scale_color_brewer(palette = "Set1") +
   labs(title = "Distribution of Observations by Tribe (Map)") +
-  theme_void()
+  theme_void() +
+  theme(legend.position = "none")
 
 # Each tribe's temporal distribution
-clean_frog %>%
+col_plot <- clean_frog %>%
   group_by(tribe) %>%
   mutate(total_tribe_obs = n()) %>%
   group_by(tribe, month) %>%
@@ -415,18 +457,507 @@ clean_frog %>%
     .groups = 'drop_last' # Keep the grouping structure for the next step
   ) %>%
   mutate(proportion = monthly_count / total_tribe_obs) %>%
-  ggplot(aes(x = month, y = proportion, fill = tribe)) +  # Replace 'body_length' with your chosen numeric column
-  geom_col(color = "black") + # Bins control the smoothness
-  facet_wrap(~tribe, nrow = 1)
-  labs(title = "Distribution of Frog Body Length Observations",
-       x = "Month",
-       y = "Frequency (Number of Observations)") +
-  scale_y_continuous(labels = scales::percent) +
+  ggplot(aes(x = proportion, y = month, fill = tribe)) +  # Replace 'body_length' with your chosen numeric column
+  geom_col(color = "black", show.legend = FALSE) + # Bins control the smoothness
+  facet_wrap(~tribe, nrow = 1) +
+  labs(x = "Month",
+       y = "Frequency") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_discrete(limits = rev)+
+  scale_fill_brewer(palette = "Set1") +
+  # theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    strip.background = element_blank(),
+    strip.text.y = element_blank(),
+    
+    panel.grid = element_blank(),
+    
+    panel.background = element_blank(),
+    panel.border = element_blank(),
+
+  )
+  
+map_plot / col_plot #+ plot_layout(heights = c(5, 2))
+```
+
+```{r}
+tribes <- unique(clean_frog$tribe)
+
+# Create a list of (map + col) pairs for each tribe
+plots <- lapply(tribes, function(t) {
+  df_t <- clean_frog %>% filter(tribe == t)
+  
+  # Map for tribe t
+  map_t <- ggplot() +
+    geom_sf(data = aussie, fill = "grey", alpha = 0.5) +
+    geom_point(data = df_t, aes(x = decimalLongitude, y = decimalLatitude), color = "steelblue") +
+    labs(title = paste(t)) +
+    theme_void()
+  
+  # Column (temporal) plot for tribe t
+  col_t <- df_t %>%
+    count(month) %>%
+    mutate(proportion = n / sum(n)) %>%
+    ggplot(aes(x = proportion, y = month, fill = t)) +
+    geom_col(show.legend = FALSE, color = "black") +
+    scale_x_continuous(labels = scales::percent) +
+    scale_y_discrete(limits = rev)+
+    theme_bw(base_size = 8) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # Combine side by side; make the map take more width
+  map_t + col_t + plot_layout(widths = c(3, 1))
+})
+
+# Combine all tribe panels into a 2x3 grid
+wrap_plots(plots, ncol = 3)
+```
+
+# Hello Again
+
+I am not going to fuss around with patchwork anymore until I can understand it better. Henceforth, I am going to export the individual plots as svg, and do the finishing touches in Inkscape.
+
+```{r}
+clean_frog %>%
+  ggplot() +
+  geom_sf(data = aussie, fill = "grey", alpha = 0.5) + # This is ggplot's function that handles polygon data
+  geom_point(data  = clean_frog, aes(x = decimalLongitude, y = decimalLatitude, color = tribe)) +
+  facet_wrap(~tribe, nrow = 2, ncol = 3) +
   scale_color_brewer(palette = "Set1") +
-  theme_void()
+  labs(title = "Distribution of Observations by Tribe (Map)") +
+  theme_void() +
+  theme(legend.position = "none")
+```
+```{r}
+# clean_frog %>%
+#   group_by(tribe) %>%
+#   mutate(total_tribe_obs = n()) %>%
+#   group_by(tribe, month) %>%
+#   summarise(
+#     monthly_count = n(),
+#     total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+#     .groups = 'drop_last' # Keep the grouping structure for the next step
+#   ) %>%
+#   mutate(proportion = monthly_count / total_tribe_obs) %>%
+#   ggplot(aes(x = proportion, y = month, fill = tribe)) +  # Replace 'body_length' with your chosen numeric column
+#   geom_col(color = "black", show.legend = FALSE) + # Bins control the smoothness
+#   facet_wrap(~tribe, nrow = 1) +
+#   labs(x = "Frequency",
+#        y = "Month") +
+#   scale_x_continuous(labels = scales::percent) +
+#   scale_y_discrete(limits = rev)+
+#   scale_fill_brewer(palette = "Set1") +
+#   # theme_bw() +
+#   theme(
+#     plot.title = element_text(hjust = 0.5),
+#     strip.background = element_blank(),
+#     strip.text.y = element_blank(),
+#     
+#     panel.grid = element_blank(),
+#     
+#     panel.background = element_blank(),
+#     panel.border = element_blank(),
+# 
+#   )
+```
+
+
+```{r}
+library(RColorBrewer)
+
+clean_frog$tribe <- factor(clean_frog$tribe)  # ensures consistent ordering
+tribe_colors <- setNames(brewer.pal(n = length(levels(clean_frog$tribe)), "Set1"),
+                         levels(clean_frog$tribe))
+```
+
+```{r}
+
+# for (t in levels(clean_frog$tribe)) {
+#   df_t <- clean_frog %>% filter(tribe == t)
+#   
+#   # Map
+#   map_t <- ggplot() +
+#     geom_sf(data = aussie, fill = "grey", alpha = 0.5) +
+#     geom_point(data = df_t, aes(x = decimalLongitude, y = decimalLatitude),
+#                color = tribe_colors[t], alpha = 0.7) +
+#     labs(title = paste(t, "Map")) +
+#     theme_void()
+#   
+#   # Column plot
+#   col_t <- df_t %>%
+#     count(month) %>%
+#     mutate(proportion = n / sum(n)) %>%
+#     ggplot(aes(x = proportion, y = month)) +
+#     geom_col(fill = tribe_colors[t], color = "black") +
+#     scale_x_continuous(labels = scales::percent) +
+#     scale_y_discrete(limits = rev) +
+#     labs(title = paste(t, "Monthly Distribution"),
+#          x = "Frequency",
+#          y = "Month") +
+#     theme_bw() +
+#     theme(
+#       panel.grid = element_blank(),
+#       axis.text.x = element_text(angle = 45, hjust = 1)
+#     )
+  
+  # Save both
+  # ggsave(filename = paste0("map_", t, ".png"), plot = map_t, width = 6, height = 5, dpi = 300)
+  # ggsave(filename = paste0("col_", t, ".png"), plot = col_t, width = 3, height = 5, dpi = 300)
+# }
+```
+
+
+
+## Testing with just two
+
+```{r}
+#| output: true
+
+font_add_google(
+  "Yusei Magic",
+  family = "title_font"
+)
+
+showtext_auto()
+
+for (t in levels(clean_frog$tribe)) {
+  df_t <- clean_frog %>% filter(tribe == t)
+  
+  # Map
+  map_t <- ggplot() +
+    geom_sf(data = aussie, fill = "grey", alpha = 0.5) +
+    geom_point(data = df_t, aes(x = decimalLongitude, y = decimalLatitude),
+               color = tribe_colors[t], alpha = 0.7) +
+    # labs(title = paste(t, "Map")) +
+    theme_void()
+  
+  # Column plot
+  col_t <- df_t %>%
+    count(month) %>%
+    mutate(proportion = n / sum(n)) %>%
+    ggplot(aes(x = proportion, y = month)) +
+    geom_col(fill = tribe_colors[t], color = "black") +
+    scale_x_continuous(labels = scales::percent, expand = c(0, 0)) +
+    scale_y_discrete(limits = rev) +
+    labs(#title = paste(t, "Monthly Distribution"),
+         x = "Frequency",
+         y = "Month") +
+    theme_bw() +
+    theme(
+      panel.grid = element_blank(),
+      panel.border = element_blank(),
+      # axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.title = element_text(family = "title_font"),
+      axis.text = element_text(family = "title_font"),
+    )
+
+  col_invert <- df_t %>%
+    count(month) %>%
+    mutate(proportion = n / sum(n)) %>%
+    ggplot(aes(x = month, y = proportion)) +
+    geom_col(fill = tribe_colors[t], color = "black") +
+    scale_y_continuous(labels = scales::percent, expand = c(0, 0)) +
+    labs(#title = paste(t, "Monthly Distribution"),
+         x = "Month",
+         y = "Frequency") +
+    theme_bw() +
+    theme(
+      panel.grid = element_blank(),
+      panel.border = element_blank(),
+      # axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.title = element_text(family = "title_font"),
+      axis.text = element_text(family = "title_font"),
+    )
+  
+  # Print both
+  print(map_t)
+  print(col_t)
+  print(col_invert)
+  
+  map_t | col_t
+  
+  break
+}
 ```
 
 
 
 
+# NOW, HOW ABOUT A STREAM GRAPH?
+
+```{r}
+library(devtools)
+devtools::install_github("hrbrmstr/streamgraph")
+devtools::session_info()
+
+library(streamgraph)
+
+
+pp <- clean_frog %>%
+  mutate(month_date = floor_date(eventDate, "month")) %>%
+  group_by(tribe) %>%
+  mutate(total_tribe_obs = n()) %>%
+  group_by(tribe, month_date) %>%
+  summarise(
+    monthly_count = n(),
+    total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+    .groups = 'drop_last' # Keep the grouping structure for the next step
+  ) %>%
+  mutate(proportion = monthly_count / total_tribe_obs) %>%
+  streamgraph(key = "tribe", value = "proportion", date = "month_date")
+
+pp
+```
+
+This isn't bad. Now, I want to:
+
+1. crimp the edges of the plot
+2. remove the y-axis ticks
+3. match the colours on the stream graphs and the map plots
+4. set the global font
+
+```{r}
+
+# Using streamgraph()
+
+
+
+# theme_set(theme_minimal(base_family = "Yusei Magic", base_size = 12))
+
+pp <- clean_frog %>%
+  mutate(month_date = floor_date(eventDate, "month")) %>%
+  group_by(tribe) %>%
+  mutate(total_tribe_obs = n()) %>%
+  group_by(tribe, month_date) %>%
+  summarise(
+    monthly_count = n(),
+    total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+    .groups = 'drop_last' # Keep the grouping structure for the next step
+  ) %>%
+  mutate(proportion = monthly_count / total_tribe_obs) %>%
+  streamgraph(key = "tribe", value = "proportion", date = "month_date")
+
+pp
+```
+
+```{r}
+#| output: true
+
+# Using ggstream
+
+library(ggstream)
+
+font_add_google(
+  "Yusei Magic",
+  family = "title_font"
+)
+
+showtext_auto()
+
+palette <- c("")
+
+theme_set(theme_minimal(base_family = "title_font", base_size = 12))
+
+theme_update(
+  # plot.title = element_text(
+  #   size = 25,
+  #   face = "bold",
+  #   hjust = .5,
+  #   margin = margin(10, 0, 30, 0)
+  # ),
+  # plot.caption = element_text(
+  #   size = 9,
+  #   color = "grey40",
+  #   hjust = .5,
+  #   margin = margin(20, 0, 5, 0)
+  # ),
+  axis.text.y = element_blank(),
+  axis.title = element_blank(),
+  # plot.background = element_rect(fill = "grey88", color = NA),
+  # panel.background = element_rect(fill = NA, color = NA),
+  panel.grid = element_blank(),
+  panel.spacing.y = unit(0, "lines"),
+  strip.text.y = element_blank(),
+  legend.position = "bottom",
+  legend.text = element_text(size = 9, color = "grey40"),
+  legend.box.margin = margin(t = 30),
+  legend.background = element_rect(
+    color = "grey40",
+    size = .3,
+    fill = "grey95"
+  ),
+  legend.key.height = unit(.25, "lines"),
+  legend.key.width = unit(2.5, "lines"),
+  # legend.title = "Tribe",
+  plot.margin = margin(rep(20, 4))
+)
+
+showtext_auto()
+
+gst <- clean_frog %>%
+  mutate(month_date = floor_date(eventDate, "month")) %>%
+  group_by(tribe) %>%
+  mutate(total_tribe_obs = n()) %>%
+  group_by(tribe, month_date) %>%
+  summarise(
+    monthly_count = n(),
+    total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+    .groups = 'drop_last' # Keep the grouping structure for the next step
+  ) %>%
+  mutate(proportion = monthly_count / total_tribe_obs) %>%
+  ggplot(
+    aes(month_date, proportion,
+        color = tribe,
+        fill = tribe)
+  ) +
+  geom_stream(
+    geom = "contour",
+    color = "white",
+    size = 1.25,
+    bw = .7 # Controls smoothness
+  ) +
+  geom_stream(
+    geom = "polygon",
+    bw = .7,
+    size = 0
+  ) +
+  scale_fill_discrete(name = "Tribe") +     # ← legend title for fill
+  scale_color_discrete(name = "Tribe")
+
+gst
+
+```
+
+```{r}
+#| output: true
+
+# Using ggstream
+
+library(ggstream)
+
+font_add_google(
+  "Yusei Magic",
+  family = "title_font"
+)
+
+showtext_auto()
+
+palette <- brewer.pal(n = length(unique(clean_frog$tribe)), name = "Set2")
+
+theme_set(theme_minimal(base_family = "title_font", base_size = 12))
+
+theme_update(
+  # plot.title = element_text(
+  #   size = 25,
+  #   face = "bold",
+  #   hjust = .5,
+  #   margin = margin(10, 0, 30, 0)
+  # ),
+  # plot.caption = element_text(
+  #   size = 9,
+  #   color = "grey40",
+  #   hjust = .5,
+  #   margin = margin(20, 0, 5, 0)
+  # ),
+  axis.text.y = element_blank(),
+  axis.title = element_blank(),
+  # plot.background = element_rect(fill = "grey88", color = NA),
+  # panel.background = element_rect(fill = NA, color = NA),
+  panel.grid = element_blank(),
+  panel.spacing.y = unit(0, "lines"),
+  strip.text.y = element_blank(),
+  legend.position = "bottom",
+  legend.text = element_text(size = 9, color = "grey40"),
+  legend.box.margin = margin(t = 30),
+  legend.background = element_rect(
+    color = "grey40",
+    size = .3,
+    fill = "grey95"
+  ),
+  legend.key.height = unit(.25, "lines"),
+  legend.key.width = unit(2.5, "lines"),
+  # legend.title = "Tribe",
+  plot.margin = margin(rep(20, 4))
+)
+
+showtext_auto()
+
+gst <- clean_frog %>%
+  mutate(month_date = floor_date(eventDate, "month")) %>%
+  group_by(tribe) %>%
+  mutate(total_tribe_obs = n()) %>%
+  group_by(tribe, month_date) %>%
+  summarise(
+    monthly_count = n(),
+    total_tribe_obs = first(total_tribe_obs), # Get the total count from the group
+    .groups = 'drop_last' # Keep the grouping structure for the next step
+  ) %>%
+  mutate(proportion = monthly_count / total_tribe_obs) %>%
+  ungroup()
+
+anchors <- gst %>%
+  group_by(tribe) %>%
+  summarise(
+    month_min = min(month_date),
+    month_max = max(month_date),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    # two points before and after range
+    before_1 = month_min - months(2),
+    before_2 = month_min - months(1),
+    after_1  = month_max + months(1),
+    after_2  = month_max + months(2)
+  ) %>%
+  select(tribe, before_1, before_2, after_1, after_2) %>%
+  tidyr::pivot_longer(
+    cols = -tribe,
+    values_to = "month_date"
+  ) %>%
+  mutate(
+    monthly_count = 0,
+    total_tribe_obs = 1,
+    proportion = 0
+  )
+
+seasons <- as.Date(c(
+  "2023-01-01", # Autumn
+  "2023-04-01", # Winter
+  "2023-07-01", # Spring
+  "2023-10-01"  # Summer
+))
+
+gst_data_smooth <- bind_rows(gst, anchors)
+
+real_range <- range(gst_data_smooth$month_date)
+
+gst_data_smooth %>%
+  mutate(month_date = floor_date(month_date, "month")) %>%
+  ggplot(
+    aes(x = month_date, y = proportion,
+        color = tribe,
+        fill = tribe)
+  ) +
+  geom_stream(
+    geom = "contour",
+    color = "white",
+    size = 1.25,
+    bw = .7 # Controls smoothness
+  ) +
+  geom_stream(
+    geom = "polygon",
+    bw = .7,
+    size = 0
+  ) +
+  scale_x_date(
+    breaks = seasons,
+    labels = scales::date_format("%b"),      # short month name (e.g. "Mar")
+    # expand = c(0, 0)                         # optional: remove extra space
+  ) +
+  coord_cartesian(xlim = real_range) +
+  scale_fill_manual(values = palette, name = "Tribe") +     # ← legend title for fill
+  scale_color_manual(values = palette, name = "Tribe")
+
+```
 
