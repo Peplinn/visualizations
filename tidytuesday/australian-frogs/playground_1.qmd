@@ -708,7 +708,7 @@ font_add_google(
 showtext_auto()
 
 # frog_palette <- c("#f0b41a", "#057cc5", "#d7bb71", "#0a2463", "#d8315b", "#1e2f23")
-frog_palette <- c("#d7bb71", "#0a2463", "#d8315b", "#057cc5", "#f0b41a", "#1e2f23")
+frog_palette <- c("#d7bb71", "#0a2463", "#d8315b", "#057cc5", "#f0b41a", "#283618")
 frog_tribes <- c("Asterophryninae", "Bufonidae", "Limnodynastidae", "Myobatrachidae", "Pelodryadidae", "Ranidae")
 # frog_palette_named <- setNames(frog_palette, unique(clean_frog$tribe))
 frog_palette_named <- setNames(frog_palette, frog_tribes)
@@ -722,11 +722,11 @@ title_text <- "Where are Australia's Frogs?"
 subtitle_text <- "Australia is home to 6 frog tribes, from the ubiquitous Myobatrachidae \nto the north-eastern Ranidae."
 subtitle_text_colored <- paste0(
   "Six frog tribes inhabit Australia, from the widespread <span style='color:",
-  frog_palette_named["Myobatrachidae"], "'>**Myobatrachidae**</span> with **64** subspecies<br>",
-  "to the <span style='color:",
+  frog_palette_named["Myobatrachidae"], "'>**Myobatrachidae**</span> <br>",
+  "with **64** subspecies to the <span style='color:",
   frog_palette_named["Ranidae"], "'>**Ranidae**</span> of the northeast, one of the few **true** frog tribes." # Adjust tribe names/colors
 )
-caption_text <- "Visualization: Chidiebube Oluoma"
+caption_text <- "**Data:** FrogID App; Rowley JJL, & Callaghan CT (2020) | **Visualization:** Chidiebube Oluoma"
 
 map_plots_wide <- clean_frog %>%
   ggplot() +
@@ -746,16 +746,16 @@ map_plots_wide <- clean_frog %>%
     legend.position = "none",
     plot.title = element_text(
       face = "bold",
-      margin = margin(10, 0, 0.5, 0),
-      size = 50
+      margin = margin(10, 0, 2, 0),
+      size = 60
     ),
     plot.subtitle = ggtext::element_markdown(
       size = 34,
       margin = margin(0, 0, 10, 0),
       lineheight = 0.3
     ),
-    plot.caption = element_text(
-      size = 30,
+    plot.caption = ggtext::element_markdown(
+      size = 20,
       lineheight = 0.05,
       margin = margin(10, 0, 5, 0)
     ),
