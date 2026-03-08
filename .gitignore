@@ -1,3 +1,10 @@
 *env/
 .Rproj.user
 /Outputs
+*.ipynb
+/tidytuesday/scottish-munros/requirements.txt
+*_cache/
+*_files/
+.Rhistory
+.Rproj
+.Rprofile
